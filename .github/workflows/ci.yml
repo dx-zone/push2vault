@@ -1,0 +1,74 @@
+name: CI & Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          check-latest: true
+          cache: true
+
+      - name: Run Vet
+        run: go vet ./...
+
+      - name: Run Tests
+        run: go test -v -race -coverprofile=coverage.out ./...
+
+  build-and-release:
+    name: Build & Release Binaries
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          check-latest: true
+          cache: true
+
+      - name: Build Cross-Platform Binaries
+        run: |
+          mkdir -p dist
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w" -o dist/push2vault-linux-amd64 main.go
+          GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w" -o dist/push2vault-linux-arm64 main.go
+          GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w" -o dist/push2vault-darwin-amd64 main.go
+          GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w" -o dist/push2vault-darwin-arm64 main.go
+
+      - name: Upload Build Artifacts (CI Runs)
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        uses: actions/upload-artifact@v4
+        with:
+          name: push2vault-binaries
+          path: dist/*
+
+      - name: Create GitHub Release (On Tag Push)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
