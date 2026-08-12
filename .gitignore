@@ -1,0 +1,22 @@
+# Binaries and build output
+bin/
+push2vault
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test artifacts & coverage
+*.test
+*.out
+coverage.txt
+
+# Local secrets & credentials (safety net)
+*.env
+*.pem.local
+
+# IDEs & System files
+.DS_Store
+.idea/
+.vscode/

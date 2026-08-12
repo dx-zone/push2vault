@@ -3,9 +3,21 @@ BINARY_NAME=push2vault
 BUILD_DIR=bin
 MODULE=github.com/dx-zone/push2vault
 
-.PHONY: all build test clean lint release-builds help
+.PHONY: all build test clean lint dev-vault dev-vault-test dev-vault-clean release-builds help
 
 all: test build
+
+## dev-vault: Configures local Vault server for testing
+dev-vault:
+	@./scripts/vault-manager.sh setup
+
+## dev-vault-test: Runs full end-to-end Vault integration test
+dev-vault-test:
+	@./scripts/vault-manager.sh test
+
+## dev-vault-clean: Tears down local Vault test configuration and mock data
+dev-vault-clean:
+	@./scripts/vault-manager.sh cleanup
 
 ## build: Builds the binary for current OS/Arch
 build:
@@ -35,7 +47,7 @@ release-builds: clean
 ## clean: Cleans build artifacts
 clean:
 	@echo "==> Cleaning build directory..."
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR) $(BINARY_NAME)
 
 ## help: Shows available targets
 help:

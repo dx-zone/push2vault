@@ -149,6 +149,8 @@ Run the full suite of unit tests, including mock HTTP server validations and sym
 go test -v ./...
 ```
 
+For a complete step-by-step guide on setting up policies, AppRole authentication, and testing locally against Vault, see [VAULT_SETUP.md](VAULT_SETUP.md).
+
 ## License
 
 Distributed under the MIT License. See [LICENSE](https://www.google.com/search?q=LICENSE) for details.
